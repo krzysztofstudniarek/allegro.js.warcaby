@@ -63,6 +63,11 @@ function draw()
 			}
 		}
 	}
+	
+	if(moveFinished){
+		rectfill(canvas, 0,0,width,height, makecol(255,255,255,127));
+		textout_centre(canvas,font,"OPPONENT MOVE",width/2,height/2,50,makecol(0,0,0))
+	}
 
 }
 
@@ -81,11 +86,15 @@ function update()
 		moveFinished = true;
 		beats.forEach(function(value){
 			if(value.xAtt == selected.x && value.yAtt == selected.y){
-				selected = undefined;
 				moveFinished = false;
 				beatMade = false;
 			}
 		});
+		
+		if(moveFinished){
+			selected = undefined;
+			beatMade = false;
+		}
 	}
 }
 
@@ -129,6 +138,7 @@ function controls ()
 			});
 		}				
 	}
+	//change to the other
 	if(pressed[KEY_A]){
 		moveFinished = false;
 	}
@@ -166,6 +176,8 @@ END_OF_MAIN();
 
 function load_elements()
 {
+	font = load_font("./antilles.ttf");
+	
 	board = [];
 	for(var i = 0; i<8; i++){
 		board[i] = [];
@@ -179,9 +191,12 @@ function load_elements()
 		board[i%8 + Math.floor(i/8+1)%2][7-Math.floor(i/8)] = 1;
 	}
 	
-	board[3][3] = -1;
+	board[4][4] = -1;
 	//board[4][4] = -1;
-	board[3][1] = -1;
+	board[4][2] = -1;
+	board[6][2] = -1;
+	
+	board[2][4] = -1;
 }
 
 function find_beat(x,y){
