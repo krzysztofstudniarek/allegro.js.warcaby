@@ -11,16 +11,28 @@ var selected;
 var board = [];
 var beats = new Set();
 
+var moveFinished = false;
+var beatMade = false;
+
 function draw()
 {   
-
-		
 	if(beats.size > 0){
-		beats.forEach(function (value){
-			rectfill(canvas,(value.xAtt)*cellSize,(value.yAtt)*cellSize,cellSize,cellSize,makecol(255,125,125));
-			rectfill(canvas,(value.x)*cellSize,(value.y)*cellSize,cellSize,cellSize,makecol(255,125,125));
-			rectfill(canvas,(value.xAfter)*cellSize,(value.yAfter)*cellSize,cellSize,cellSize,makecol(255,125,125));
-		});
+		if(selected == undefined){
+			beats.forEach(function (value){
+				rectfill(canvas,(value.xAtt)*cellSize,(value.yAtt)*cellSize,cellSize,cellSize,makecol(255,125,125));
+				rectfill(canvas,(value.x)*cellSize,(value.y)*cellSize,cellSize,cellSize,makecol(255,125,125));
+				rectfill(canvas,(value.xAfter)*cellSize,(value.yAfter)*cellSize,cellSize,cellSize,makecol(255,125,125));
+			});
+		}else{
+			beats.forEach(function (value){
+				if(value.xAtt == selected.x && value.yAtt == selected.y){
+					rectfill(canvas,(value.xAtt)*cellSize,(value.yAtt)*cellSize,cellSize,cellSize,makecol(255,125,125));
+					rectfill(canvas,(value.x)*cellSize,(value.y)*cellSize,cellSize,cellSize,makecol(255,125,125));
+					rectfill(canvas,(value.xAfter)*cellSize,(value.yAfter)*cellSize,cellSize,cellSize,makecol(255,125,125));
+				}
+			});
+		}
+		
 	}else{
 		if(selected != undefined){
 			circlefill(canvas,selected.x*cellSize + cellSize/2,selected.y*cellSize + cellSize/2,20,makecol(0,255,0));
@@ -64,39 +76,61 @@ function update()
 			}
 		}
 	}
+	
+	if(beatMade){
+		moveFinished = true;
+		beats.forEach(function(value){
+			if(value.xAtt == selected.x && value.yAtt == selected.y){
+				selected = undefined;
+				moveFinished = false;
+				beatMade = false;
+			}
+		});
+	}
 }
 
 function controls ()
 {
-	if(mouse_pressed&1 && beats.size == 0){
-		if(board[Math.floor(mouse_x/cellSize)][Math.floor(mouse_y/cellSize)] == 1){
-			selected = {
-				x: Math.floor(mouse_x/cellSize), 
-				y: Math.floor(mouse_y/cellSize)
-				};
-		}else if(selected != undefined && Math.floor(mouse_x/cellSize) == selected.x -1 && Math.floor(mouse_y/cellSize) == selected.y - 1 && board[selected.x-1][selected.y-1] == undefined){
-			board[selected.x-1][selected.y-1] = 1;
-			board[selected.x][selected.y] = undefined;
-			selected = undefined;
-		}else if(selected != undefined && Math.floor(mouse_x/cellSize) == selected.x + 1 && Math.floor(mouse_y/cellSize) == selected.y - 1 && board[selected.x+1][selected.y-1] == undefined){
-			board[selected.x+1][selected.y-1] = 1;
-			board[selected.x][selected.y] = undefined;
-			selected = undefined;
-		}
-	}else if(mouse_pressed&1){
-		beats.forEach(function(value){
-			if(selected == undefined && Math.floor(mouse_x/cellSize) == value.xAtt && Math.floor(mouse_y/cellSize) == value.yAtt){
+	if(!moveFinished){
+		if(mouse_pressed&1 && beats.size == 0){
+			if(board[Math.floor(mouse_x/cellSize)][Math.floor(mouse_y/cellSize)] == 1){
 				selected = {
-					x : value.xAtt,
-					y : value.xAtt
-				}
-			}else if(selected != undefined && Math.floor(mouse_x/cellSize) == value.xAfter && Math.floor(mouse_y/cellSize) == value.yAfter){
-				board[value.x][value.y] = undefined;
-				board[value.xAtt][value.yAtt] = undefined;
-				board[value.xAfter][value.yAfter] = 1;
+					x: Math.floor(mouse_x/cellSize), 
+					y: Math.floor(mouse_y/cellSize)
+					};
+			}else if(selected != undefined && Math.floor(mouse_x/cellSize) == selected.x -1 && Math.floor(mouse_y/cellSize) == selected.y - 1 && board[selected.x-1][selected.y-1] == undefined){
+				board[selected.x-1][selected.y-1] = 1;
+				board[selected.x][selected.y] = undefined;
 				selected = undefined;
+				moveFinished = true;
+			}else if(selected != undefined && Math.floor(mouse_x/cellSize) == selected.x + 1 && Math.floor(mouse_y/cellSize) == selected.y - 1 && board[selected.x+1][selected.y-1] == undefined){
+				board[selected.x+1][selected.y-1] = 1;
+				board[selected.x][selected.y] = undefined;
+				selected = undefined;
+				moveFinished = true;
 			}
-		});
+		}else if(mouse_pressed&1){
+			beats.forEach(function(value){
+				if(selected == undefined && Math.floor(mouse_x/cellSize) == value.xAtt && Math.floor(mouse_y/cellSize) == value.yAtt){
+					selected = {
+						x : value.xAtt,
+						y : value.yAtt
+					}
+				}else if(selected != undefined && Math.floor(mouse_x/cellSize) == value.xAfter && Math.floor(mouse_y/cellSize) == value.yAfter && value.xAtt == selected.x && value.yAtt == selected.y){
+					board[value.x][value.y] = undefined;
+					board[value.xAtt][value.yAtt] = undefined;
+					board[value.xAfter][value.yAfter] = 1;
+					selected = {
+						x : value.xAfter,
+						y : value.yAfter
+					};
+					beatMade = true;
+				}
+			});
+		}				
+	}
+	if(pressed[KEY_A]){
+		moveFinished = false;
 	}
 }
 
@@ -123,6 +157,7 @@ function main()
             update();
 			events();
             draw();
+			console.log(moveFinished);
         },BPS_TO_TIMER(60));
     });
     return 0;
@@ -145,7 +180,7 @@ function load_elements()
 	}
 	
 	board[3][3] = -1;
-	board[1][1] = -1;
+	//board[4][4] = -1;
 	board[3][1] = -1;
 }
 
