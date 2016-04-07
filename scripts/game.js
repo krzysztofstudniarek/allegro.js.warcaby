@@ -120,7 +120,7 @@ function controls ()
 			}
 		}else if(mouse_pressed&1){
 			beats.forEach(function(value){
-				if(selected == undefined && Math.floor(mouse_x/cellSize) == value.xAtt && Math.floor(mouse_y/cellSize) == value.yAtt){
+				if(Math.floor(mouse_x/cellSize) == value.xAtt && Math.floor(mouse_y/cellSize) == value.yAtt){
 					selected = {
 						x : value.xAtt,
 						y : value.yAtt
@@ -167,7 +167,6 @@ function main()
             update();
 			events();
             draw();
-			console.log(moveFinished);
         },BPS_TO_TIMER(60));
     });
     return 0;
@@ -183,20 +182,20 @@ function load_elements()
 		board[i] = [];
 	}
 	
-	/*for(var i = 0; i<24; i = i+2){
+	for(var i = 0; i<24; i = i+2){
 		board[i%8 + Math.floor(i/8)%2][Math.floor(i/8)] = -1;
-	}*/
+	}
 	
 	for(var i = 0; i<24; i=i+2){
 		board[i%8 + Math.floor(i/8+1)%2][7-Math.floor(i/8)] = 1;
 	}
 	
-	board[4][4] = -1;
 	//board[4][4] = -1;
-	board[4][2] = -1;
-	board[6][2] = -1;
+	//board[4][4] = -1;
+	//board[4][2] = -1;
+	//board[6][2] = -1;
 	
-	board[2][4] = -1;
+	//board[2][4] = -1;
 }
 
 function find_beat(x,y){
